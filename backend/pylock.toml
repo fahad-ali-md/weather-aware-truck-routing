@@ -1,0 +1,101 @@
+lock-version = "1.0"
+created-by = "uv"
+requires-python = ">=3.13.2"
+
+[[packages]]
+name = "asgiref"
+version = "3.13.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/2e/b0/ec211e1f7966247cb6469158d856bac9aa4c2fe13621bd6a352e4f850453/asgiref-3.13.0-py3-none-any.whl", upload-time = 2026-10-23T08:13:13Z, size = 27593, hashes = { sha256 = "f9596a2434512686473d50f96ff6207fbba49ae1a785dfac614df4aeb085674d" } }]
+
+[[packages]]
+name = "attrs"
+version = "26.1.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl", upload-time = 2026-03-19T14:22:23Z, size = 67548, hashes = { sha256 = "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309" } }]
+
+[[packages]]
+name = "django"
+version = "5.2.19"
+wheels = [{ url = "https://files.pythonhosted.org/packages/3c/fb/65b4e897d1268288a46457493d9aec6541be8be08e0093a93cc101c03ab2/django-5.2.19-py3-none-any.whl", upload-time = 2026-11-03T15:22:03Z, size = 8319631, hashes = { sha256 = "5965d974a5218a2b68a11dd1276434707f23886525c23f0598eccedaf4f4ca00" } }]
+
+[[packages]]
+name = "django-cf"
+version = "0.2.17"
+wheels = [{ url = "https://files.pythonhosted.org/packages/57/6e/9b88fb52f3f86d8d29dc90ac2723999645a1047c72499ef79c34ecca779f/django_cf-0.2.17-py3-none-any.whl", upload-time = 2026-10-06T04:01:13Z, size = 25704, hashes = { sha256 = "8c51f251de623f6632dc0963f3b56f691556f00d837cc100fa0ed27d27a0db08" } }]
+
+[[packages]]
+name = "django-environ"
+version = "0.14.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/1a/fe/67b423fc30f16d10259e901320fbc121746bf168aaaad9043e6ebb0110c1/django_environ-0.14.0-py3-none-any.whl", upload-time = 2026-06-18T22:49:54Z, size = 20934, hashes = { sha256 = "8dbe8a57f0a540ab8abd6f54f230de5e99e3a2c9d797cb9caecb037bca3d47d8" } }]
+
+[[packages]]
+name = "djangorestframework"
+version = "3.18.3"
+wheels = [{ url = "https://files.pythonhosted.org/packages/c4/dd/de5f4543765bec94e036a5e9593a42f8fa7efec8de78eb56b9ca834385f3/djangorestframework-3.18.3-py3-none-any.whl", upload-time = 2026-10-06T21:33:49Z, size = 903986, hashes = { sha256 = "8544bb674846731b1e3c9b309236ee1dc412905a0aa725be2ec193ca950a7d12" } }]
+
+[[packages]]
+name = "drf-spectacular"
+version = "0.30.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/c3/56/74dd7b45bbde6d24494220b98d6961cb1200b63a1800332b430daa2c4551/drf_spectacular-0.30.0-py3-none-any.whl", upload-time = 2026-07-06T11:29:45Z, size = 111150, hashes = { sha256 = "006cf5921ebe20a9bd24f7c846261ebbf78780be5961b0d6e87afaa82afd62ff" } }]
+
+[[packages]]
+name = "httpx"
+version = "0.28.1"
+wheels = [
+    { url = "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/httpx-0.28.1-py3-none-any.whl", hashes = { sha256 = "3f2988f46a075b5f926a582464d53783577044cf47def13585519012b614b54f" } },
+    { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hashes = { sha256 = "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad" } },
+]
+
+[[packages]]
+name = "idna"
+version = "3.20"
+wheels = [{ url = "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl", upload-time = 2026-09-17T14:11:03Z, size = 69583, hashes = { sha256 = "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c" } }]
+
+[[packages]]
+name = "inflection"
+version = "0.5.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/59/91/aa6bde563e0085a02a435aa99b49ef75b0a4b062635e606dab23ce18d720/inflection-0.5.1-py2.py3-none-any.whl", upload-time = 2020-08-22T08:16:27Z, size = 9454, hashes = { sha256 = "f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2" } }]
+
+[[packages]]
+name = "jsonschema"
+version = "4.25.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/bf/9c/8c95d856233c1f82500c2450b8c68576b4cf1c871db3afac5c34ff84e6fd/jsonschema-4.25.1-py3-none-any.whl", upload-time = 2025-08-18T17:03:48Z, size = 90040, hashes = { sha256 = "3fba0169e345c7175110351d456342c364814cfcf3b964ba4587f22915230a63" } }]
+
+[[packages]]
+name = "jsonschema-specifications"
+version = "2025.9.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", upload-time = 2025-09-08T01:34:57Z, size = 18437, hashes = { sha256 = "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe" } }]
+
+[[packages]]
+name = "pyyaml"
+version = "6.0.2"
+wheels = [{ url = "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyyaml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl", hashes = { sha256 = "02c517acb78aa37b1ae95c964442f5f77ddf217ab8f76c1422fca52ffe4cb784" } }]
+
+[[packages]]
+name = "referencing"
+version = "0.37.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl", upload-time = 2025-10-13T15:30:47Z, size = 26766, hashes = { sha256 = "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231" } }]
+
+[[packages]]
+name = "rpds-py"
+version = "0.23.1"
+wheels = [{ url = "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/rpds_py-0.23.1-cp313-cp313-pyodide_2025_0_wasm32.whl", hashes = { sha256 = "6e485db7f7d28817e45e271d73d7a416f632d9eb79982ed2ee575e5e63291458" } }]
+
+[[packages]]
+name = "sqlparse"
+version = "0.6.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/df/ff/2fee788e82e75be8f210c65c5d103bf44c880e3769c884652a4cd911b8ba/sqlparse-0.6.1-py3-none-any.whl", upload-time = 2026-11-01T18:06:47Z, size = 51200, hashes = { sha256 = "3be5a72d04c873d690d7c6dedd33d6fae2ef82759881ceec02fc2efd0cba564f" } }]
+
+[[packages]]
+name = "uritemplate"
+version = "4.2.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/a9/99/3ae339466c9183ea5b8ae87b34c0b897eda475d2aec2307cae60e5cd4f29/uritemplate-4.2.0-py3-none-any.whl", upload-time = 2025-06-02T15:12:03Z, size = 11488, hashes = { sha256 = "962201ba1c4edcab02e60f9a0d3821e82dfc5d2d6662a21abd533879bdb8a686" } }]
+
+[[packages]]
+name = "whitenoise"
+version = "6.12.0"
+wheels = [{ url = "https://files.pythonhosted.org/packages/db/eb/d5583a11486211f3ebd4b385545ae787f32363d453c19fffd81106c9c138/whitenoise-6.12.0-py3-none-any.whl", upload-time = 2026-02-27T00:05:40Z, size = 20302, hashes = { sha256 = "fc5e8c572e33ebf24795b47b6a7da8da3c00cff2349f5b04c02f28d0cc5a3cc2" } }]
+
+[[packages]]
+name = "workers-runtime-sdk"
+version = "1.9.6"
+wheels = [{ url = "https://files.pythonhosted.org/packages/58/e4/fffa3f6b3eb91b34dcc06f0b9de016cb90c156ae2a2e944054b02618e981/workers_runtime_sdk-1.9.6-py3-none-any.whl", upload-time = 2026-11-04T07:04:34Z, size = 41483, hashes = { sha256 = "f343880a9c1380dd9b340808df93d584ff3c77428f932e14f4a23c36b7bd1bdc" } }]

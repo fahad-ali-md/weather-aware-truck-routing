@@ -1,0 +1,39 @@
+{
+  "name": "weather-routing",
+  "account_id": "888ad088a0b226524650478393ad1561",
+  "main": "src/worker.py",
+  "compatibility_date": "2026-11-18",
+  "compatibility_flags": [
+    "python_workers"
+  ],
+  "workers_dev": true,
+  "vars": {
+    "DJANGO_ALLOWED_HOST": "weather-routing.fahad288ali.workers.dev"
+  },
+  "assets": {
+    "directory": "../frontend/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "weather-routing",
+      "database_id": "3f57ae1a-bf1c-43cd-aaf2-381dba3e0893"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "python_modules": {
+    "exclude": [
+      ".venv/**",
+      ".venv-workers/**",
+      "**/__pycache__/**",
+      "**/*.pyc"
+    ]
+  }
+}

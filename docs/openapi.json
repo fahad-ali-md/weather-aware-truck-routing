@@ -1,0 +1,412 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Weather-Aware Truck Routing",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/routes/": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TripInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/forecast/": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checkpoints": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Forecast"
+                      }
+                    }
+                  },
+                  "required": [
+                    "checkpoints"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rank/": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ranking"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "routing_configured": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "routing_configured"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Risk": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Moderate",
+              "High",
+              "Severe",
+              "No Travel",
+              "Unknown"
+            ]
+          },
+          "score": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "score",
+          "reason"
+        ]
+      },
+      "Forecast": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "wind_mph": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rain_in": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "snow_in": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "risk": {
+            "$ref": "#/components/schemas/Risk"
+          },
+          "frames": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "number",
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "description": "49 hourly frames: [wind_mph, rain_in, snow_in, risk_level, wind_direction_deg]."
+          },
+          "wind_direction_deg": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Meteorological wind direction in degrees: the direction wind comes from."
+          }
+        },
+        "required": [
+          "id",
+          "wind_mph",
+          "rain_in",
+          "snow_in",
+          "risk",
+          "frames",
+          "wind_direction_deg"
+        ]
+      },
+      "Checkpoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "mile": {
+            "type": "number"
+          },
+          "represented_miles": {
+            "type": "number"
+          },
+          "eta": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lat",
+          "lon",
+          "mile",
+          "represented_miles",
+          "eta"
+        ]
+      },
+      "Route": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "miles": {
+            "type": "number"
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "arrival": {
+            "type": "string"
+          },
+          "geometry": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "checkpoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Checkpoint"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "miles",
+          "duration_seconds",
+          "arrival",
+          "geometry",
+          "checkpoints"
+        ]
+      },
+      "Place": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "label",
+          "lat",
+          "lon"
+        ]
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/Place"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Place"
+          },
+          "departure": {
+            "type": "string"
+          },
+          "load_lb": {
+            "type": "number"
+          },
+          "spacing": {
+            "type": "number"
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Route"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure",
+          "load_lb",
+          "spacing",
+          "routes",
+          "warnings"
+        ]
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "risk_miles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "average_risk": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "duration_seconds": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "risk_miles",
+          "average_risk",
+          "eligible",
+          "duration_seconds"
+        ]
+      },
+      "TripInput": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "departure": {
+            "type": "string"
+          },
+          "load_lb": {
+            "type": "number"
+          },
+          "spacing": {
+            "type": "integer",
+            "enum": [
+              10,
+              25,
+              50
+            ]
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure",
+          "load_lb",
+          "spacing"
+        ]
+      },
+      "Ranking": {
+        "type": "object",
+        "properties": {
+          "summaries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Summary"
+            }
+          },
+          "recommended_index": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "summaries",
+          "recommended_index"
+        ]
+      }
+    }
+  }
+}

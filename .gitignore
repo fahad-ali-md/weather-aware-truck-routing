@@ -1,0 +1,16 @@
+.DS_Store
+.pnpm-store/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/.wrangler/
+**/.dev.vars
+**/.env
+**/.env.*
+!**/.env.example
+**/.dev.vars.*
+**/.pytest_cache/
+**/.ruff_cache/
+**/db.sqlite3
+**/.venv-workers/
+**/python_modules/
