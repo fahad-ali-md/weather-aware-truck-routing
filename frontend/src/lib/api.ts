@@ -46,7 +46,7 @@ export async function analyze(input: TripInput, signal: AbortSignal, update: (pl
   let completed = 0
   const batches = Array.from({ length: Math.ceil(points.length / 12) }, (_, i) => points.slice(i * 12, i * 12 + 12))
   let weatherFailures = 0
-  // At most two requests at once; the slider then reuses all returned forecasts.
+  // Limit concurrency while allowing independent forecast batches to overlap.
   let next = 0
   async function worker() {
     while (next < batches.length) {
@@ -68,7 +68,7 @@ export async function analyze(input: TripInput, signal: AbortSignal, update: (pl
       update(structuredClone(plan), `Weather checked at ${completed} of ${points.length} locations`)
     }
   }
-  await Promise.all([worker(), worker()])
+  await Promise.all(Array.from({ length: Math.min(4, batches.length) }, () => worker()))
   if (weatherFailures) plan.warnings.push('Some forecasts could not be loaded. Affected routes cannot be recommended. Retry the trip to refresh them.')
   const ranked = await api<components['schemas']['Ranking']>('rank', {
     routes: plan.routes.map(route => ({ duration_seconds: route.duration_seconds,
