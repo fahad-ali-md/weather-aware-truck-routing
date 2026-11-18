@@ -3,6 +3,7 @@
 import bisect
 import math
 from datetime import UTC, datetime, timedelta
+from time import perf_counter
 
 from trips.risk import classify
 
@@ -61,11 +62,12 @@ def sample(hourly, at, load_lb):
     }
 
 
-def forecast(checkpoints, departure, load_lb):
+def forecast(checkpoints, departure, load_lb, timings=None):
     end = max(
         departure + timedelta(hours=49),
         *(datetime.fromisoformat(p["eta"]) + timedelta(hours=1) for p in checkpoints),
     )
+    started = perf_counter()
     result = get_json(
         "https://api.open-meteo.com/v1/forecast",
         {
@@ -80,6 +82,9 @@ def forecast(checkpoints, departure, load_lb):
             "end_date": end.date().isoformat(),
         },
     )
+    if timings is not None:
+        timings["weather_provider"] = (perf_counter() - started) * 1000
+    started = perf_counter()
     results = result if isinstance(result, list) else [result]
     if len(results) != len(checkpoints):
         raise ProviderError("Weather provider returned incomplete location coverage.")
@@ -114,6 +119,8 @@ def forecast(checkpoints, departure, load_lb):
                 "frames": frames,
             }
         )
+    if timings is not None:
+        timings["weather_processing"] = (perf_counter() - started) * 1000
     return output
 
 

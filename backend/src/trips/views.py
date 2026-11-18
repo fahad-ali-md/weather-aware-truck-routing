@@ -36,7 +36,20 @@ def json_endpoint(function):
             data = json.loads(request.body)
             if not isinstance(data, dict):
                 raise ValueError("Expected a JSON object.")
-            return JsonResponse(function(data))
+            timings = {}
+            if request.headers.get("X-Performance-Debug") == "1" and function.__name__ in {
+                "routes",
+                "weather",
+            }:
+                result = function(data, timings=timings)
+            else:
+                result = function(data)
+            response = JsonResponse(result)
+            if timings:
+                response["Server-Timing"] = ", ".join(
+                    f"{name};dur={duration:.2f}" for name, duration in timings.items()
+                )
+            return response
         except ProviderError as error:
             return JsonResponse({"error": str(error)}, status=error.status)
         except (ValueError, TypeError, KeyError, OverflowError, AttributeError):
@@ -55,12 +68,12 @@ def status(request):
 
 
 @json_endpoint
-def routes(data):
-    return plan(data)
+def routes(data, timings=None):
+    return plan(data, timings=timings)
 
 
 @json_endpoint
-def weather(data):
+def weather(data, timings=None):
     points = data["checkpoints"]
     if not isinstance(points, list) or not 1 <= len(points) <= 12:
         raise ValueError("Forecast batches must contain 1–12 checkpoints.")
@@ -84,7 +97,7 @@ def weather(data):
                 "eta": eta.isoformat(),
             }
         )
-    return {"checkpoints": forecast(validated, departure, load)}
+    return {"checkpoints": forecast(validated, departure, load, timings=timings)}
 
 
 @json_endpoint

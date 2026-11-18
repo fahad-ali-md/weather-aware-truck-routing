@@ -67,6 +67,22 @@ def test_provider_failure_is_controlled():
     assert response.status_code == 502
 
 
+def test_performance_header_is_opt_in_and_not_in_json():
+    def fake_plan(_data, timings=None):
+        if timings is not None:
+            timings.update({"geocoding": 12.5, "routing": 34.0, "checkpoints": 1.0})
+        return {"routes": []}
+
+    with patch("trips.views.plan", side_effect=fake_plan):
+        regular = post("routes", trip())
+        measured = post("routes", trip(), HTTP_X_PERFORMANCE_DEBUG="1")
+    assert "Server-Timing" not in regular
+    assert (
+        measured["Server-Timing"] == "geocoding;dur=12.50, routing;dur=34.00, checkpoints;dur=1.00"
+    )
+    assert regular.json() == measured.json() == {"routes": []}
+
+
 def test_rank_rejects_inconsistent_risk():
     point = {"represented_miles": 1, "risk": {"level": "No Travel", "score": 0}}
     assert (

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from time import perf_counter
 
 from integrations import tomtom
 from integrations.weather import utc_datetime
@@ -26,10 +27,17 @@ def trip_input(data):
     return origin, destination, departure, load, spacing
 
 
-def plan(data):
+def plan(data, timings=None):
     origin, destination, departure, load, spacing = trip_input(data)
+    started = perf_counter()
     start, end = tomtom.geocode_pair(origin, destination)
+    if timings is not None:
+        timings["geocoding"] = (perf_counter() - started) * 1000
+    started = perf_counter()
     raw_routes = tomtom.calculate_routes(start, end, departure)
+    if timings is not None:
+        timings["routing"] = (perf_counter() - started) * 1000
+    started = perf_counter()
     routes, seen = [], set()
     for raw in raw_routes:
         route = build_route(raw, len(routes), departure, spacing)
@@ -39,6 +47,8 @@ def plan(data):
             routes.append(route)
     if not routes:
         raise ValueError("No distinct routes were returned.")
+    if timings is not None:
+        timings["checkpoints"] = (perf_counter() - started) * 1000
     return {
         "origin": start,
         "destination": end,
