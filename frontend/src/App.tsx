@@ -21,7 +21,7 @@ function App() {
   const [showRules, setShowRules] = useState(false)
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false)
   const mobilePanel = useRef<HTMLElement>(null)
-  const mobileSearch = useRef<HTMLButtonElement>(null)
+  const mobileSearch = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (!mobilePanelOpen || !window.matchMedia('(max-width: 767px)').matches) return
     const previousOverflow = document.body.style.overflow
@@ -136,7 +136,7 @@ function App() {
         <section className="map-section" id="route-map" aria-labelledby="map-title">
           <div className="map-stage"><WeatherMap plan={plan} selected={selected} onSelect={setSelected} focusId={focusId} hour={hour} heatmap={heatmap} /></div>
           <div className="map-heading"><div><span className="eyebrow">{plan ? 'YOUR JOURNEY' : 'ROUTE EXPLORER'}</span><h2 id="map-title">{plan ? `${plan.origin.label.split(',')[0]} → ${plan.destination.label.split(',')[0]}` : 'Your next route, in focus.'}</h2><p>{plan ? `${plan.routes.length} truck routes · ${plan.spacing}-mile weather checkpoints` : 'Plan a trip to see the weather along your way.'}</p></div>{plan && <span className="map-selection">{plan.routes[selected].name}</span>}</div>
-          <button ref={mobileSearch} type="button" className="mobile-map-search" aria-label={plan ? 'Open trip details and route options' : 'Open trip planner'} aria-expanded={mobilePanelOpen} aria-controls="trip-planner" onClick={() => setMobilePanelOpen(true)}><span className="mobile-search-icon" aria-hidden="true">⌕</span><span className="mobile-search-copy"><strong>{submittedTrip ? `${submittedTrip.origin} → ${submittedTrip.destination}` : 'Where are you headed?'}</strong><small>{busy ? progress : plan ? `${plan.routes.length} routes · ${plan.routes[selected].name} selected` : 'Enter your trip details'}</small></span><span className="mobile-search-action">{plan ? 'Routes' : 'Plan'}</span></button>
+          <div className="mobile-map-search"><svg className="mobile-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.8" /><path d="m15.5 15.5 4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg><input ref={mobileSearch} type="text" readOnly value={submittedTrip ? `${submittedTrip.origin} → ${submittedTrip.destination}` : ''} placeholder="Search your destination" aria-label="Open trip planner" aria-expanded={mobilePanelOpen} aria-controls="trip-planner" onClick={() => setMobilePanelOpen(true)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setMobilePanelOpen(true) } }} /><button type="button" className="mobile-search-action" aria-label={plan ? 'Show route options' : 'Open trip planner'} onClick={() => setMobilePanelOpen(true)}>{plan ? 'Routes' : 'Plan'}</button></div>
           <div className="map-dock"><ForecastSlider key={`${plan?.departure}:${plan?.routes[selected]?.id}`} departure={plan?.departure} route={plan?.routes[selected]} hour={hour} setHour={setHour} heatmap={heatmap} setHeatmap={setHeatmap} /></div>
         </section>
         {plan?.warnings.map(warning => <div className="workspace-notice notice" key={warning}>{warning}</div>)}
