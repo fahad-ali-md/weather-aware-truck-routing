@@ -218,10 +218,9 @@ tbody tr:hover { background: #f7fafc; }
 .maplibregl-popup-content p { margin-top: 8px; color: var(--muted); }
 .maplibregl-popup-close-button { min-width: 32px; min-height: 32px; }
 .wind-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.wind-control { position: absolute; top: 130px; left: 20px; max-width: min(210px, calc(100% - 100px)); padding: 4px 12px 10px; background: #fffffff5; border: 1px solid #c9d8e0; border-radius: 7px; }
-.wind-control button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
-.wind-control button span { margin-left: auto; background: var(--teal-soft); padding: 3px 7px; border-radius: 4px; color: var(--teal); font-size: 12px; }
-.wind-control small { display: block; font-size: 11px; line-height: 1.5; }
+.wind-control { position: absolute; top: 130px; left: 20px; background: #fffffff5; border: 1px solid #c9d8e0; border-radius: 8px; box-shadow: 0 2px 8px #162b3a20; }
+.wind-control button { width: 44px; height: 44px; display: grid; place-items: center; color: #697e8d; border-radius: 7px; }
+.wind-control button[aria-pressed="true"] { color: var(--teal); background: var(--teal-soft); }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 50% { opacity: .4; } }
 @media (min-width: 1600px) {
