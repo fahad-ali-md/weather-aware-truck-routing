@@ -86,5 +86,5 @@ export function WindLayer({ mapRef, ready, route, hour, weatherVisible }: {
     }
   }, [mapRef, ready, route, hour, enabled, weatherVisible, reducedMotion])
 
-  return <><canvas ref={canvas} className="wind-canvas" aria-hidden="true" />{route && <div className="wind-control"><button type="button" aria-pressed={enabled} onClick={() => setEnabled(!enabled)}>≋ Wind motion <span>{enabled ? 'On' : 'Off'}</span></button><small>{reducedMotion ? 'Paused · reduced motion' : !weatherVisible ? 'Enable weather layer' : !available ? 'Calm or direction unavailable' : `+${hour}h · Flow follows forecast wind`}</small></div>}</>
+  return <><canvas ref={canvas} className="wind-canvas" aria-hidden="true" />{route && <div className="wind-control"><button type="button" aria-pressed={enabled} onClick={() => setEnabled(!enabled)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M2 12h16a3 3 0 1 1-3 3M4 16h6a2.5 2.5 0 1 1-2.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>Wind motion <span>{enabled ? 'On' : 'Off'}</span></button><small>{reducedMotion ? 'Paused · reduced motion' : !weatherVisible ? 'Enable weather layer' : !available ? 'Calm or direction unavailable' : `+${hour}h · Flow follows forecast wind`}</small></div>}</>
 }
