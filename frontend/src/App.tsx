@@ -125,7 +125,7 @@ function App() {
           <div className="directions-settings"><span>{new Date(submittedTrip.departure).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span><span>{submittedTrip.load_lb.toLocaleString()} lb</span><button disabled={busy} onClick={() => setEditingTrip(true)}>Edit trip</button></div>
         </div>}
         <div hidden={!editingTrip}>
-          {plan && <button className="back-to-routes" onClick={() => setEditingTrip(false)}>← Back to route options</button>}
+          {plan && <div className="route-options-link"><button className="back-to-routes" onClick={() => setEditingTrip(false)}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><circle cx="3.5" cy="6" r="1.4" fill="currentColor" /><circle cx="3.5" cy="12" r="1.4" fill="currentColor" /><circle cx="3.5" cy="18" r="1.4" fill="currentColor" /></svg>Route options <span>{plan.routes.length}</span></button></div>}
           <TripForm busy={busy} onSubmit={submit} onCancel={() => { active.current?.abort(); setPlan(null); setBusy(false); setProgress(''); setEditingTrip(true) }} />
         </div>
         {error && <div className="sidebar-message notice danger" role="alert">{error}</div>}

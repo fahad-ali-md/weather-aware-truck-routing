@@ -148,7 +148,10 @@
 .directions-stops .stop-destination { border-color: #d14945; background: #d14945; }
 .directions-settings { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; min-height: 52px; font-size: 12px; color: var(--muted); }
 .directions-settings button { margin-left: auto; min-height: 44px; color: #1967d2; font-size: 13px; font-weight: 500; }
-.back-to-routes { display: block; min-height: 48px; padding: 12px 24px 0; color: #1967d2; font-size: 13px; }
+.route-options-link { padding: 16px 24px 0; }
+.back-to-routes { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; color: #1967d2; background: #eef4ff; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.back-to-routes:hover { background: #e1edff; }
+.back-to-routes span { display: grid; place-items: center; min-width: 21px; height: 21px; padding-inline: 5px; border-radius: 50%; background: #fff; font-size: 11px; }
 .directions-progress { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--line); color: #1967d2; }
 .directions-progress > div { min-width: 0; flex: 1; }
 .directions-progress strong { font-size: 13px; font-weight: 500; }
