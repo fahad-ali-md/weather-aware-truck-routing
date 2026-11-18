@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource } from 'maplibre-gl'
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
@@ -134,6 +134,10 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
   const [minimized, setMinimized] = useState(false)
   const selectedTime = departure ? new Date(new Date(departure).getTime() + hour * 3600000) : null
   const forecast = route ? corridorAt(route.checkpoints, hour) : null
+  const windOutlook = useMemo(
+    () => route ? Array.from({ length: 49 }, (_, index) => corridorAt(route.checkpoints, index)) : [],
+    [route],
+  )
   const available = !!departure && !!forecast?.known
   useEffect(() => {
     if (!playing || !heatmap || !available) return
@@ -156,8 +160,7 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
     <div id="forecast-content" hidden={minimized || !route}>{route && <div className="forecast-timeline">
       <div className="timeline-heading"><div><span className="timeline-label">FORECAST TIMELINE</span><span className="timeline-date">{selectedTime ? `${selectedTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${time(selectedTime.toISOString())}` : 'Forecast pending'}<b>+{hour}h</b></span></div><button className={`layer-toggle ${heatmap ? 'enabled' : ''}`} type="button" aria-pressed={heatmap} onClick={() => { setPlaying(false); setHeatmap(!heatmap) }}>Weather layer <i /></button></div>
       <div className="timeline-track"><button className="forecast-play" type="button" disabled={!available} aria-label={playing ? 'Pause forecast animation' : 'Play 48-hour forecast'} onClick={() => { if (!playing && hour === 48) setHour(0); setHeatmap(true); setPlaying(!playing) }}>{playing ? 'Ⅱ' : '▶'}</button><div className="timeline-scrubber">
-        <div className="forecast-wind-chart" aria-label="Hourly maximum wind along the selected route">{Array.from({ length: 49 }, (_, index) => {
-          const reading = corridorAt(route.checkpoints, index)
+        <div className="forecast-wind-chart" aria-label="Hourly maximum wind along the selected route">{windOutlook.map((reading, index) => {
           return <button key={index} type="button" tabIndex={-1} disabled={!reading.known} aria-label={`Hour ${index}: maximum wind ${reading.wind?.toFixed(1) ?? 'unavailable'} mph`} aria-pressed={index === hour} title={`+${index}h · ${reading.wind?.toFixed(1) ?? '—'} mph`} onClick={() => seek(index)}><i style={{ height: `${Math.max(10, Math.min(100, (reading.wind ?? 0) / 55 * 100))}%`, background: index === hour ? '#b8f2df' : colors[reading.worst] }} /></button>
         })}</div>
         <input aria-label="Forecast hours after departure" type="range" min="0" max="48" step="1" value={hour} disabled={!departure} onChange={event => seek(Number(event.target.value))} />
