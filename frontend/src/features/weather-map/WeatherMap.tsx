@@ -5,7 +5,7 @@ import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { colors, levels, routeColors, time } from '../../lib/api'
 import type { Plan, Route } from '../../lib/api'
-import { corridorAt, forecastAt, forecastWeight } from './forecast'
+import { corridorAt, forecastAt, forecastWeight, formatPrecipitation } from './forecast'
 import { WindLayer } from './WindLayer'
 
 // MapLibre 6 ships its worker separately. Let Vite bundle and serve its URL.
@@ -155,7 +155,7 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
   return <section className={`forecast-panel ${route ? 'has-route' : 'is-empty'} ${minimized ? 'is-minimized' : ''}`} aria-label="48 hour corridor weather forecast">
     <div className="forecast-summary">
       <div className="forecast-summary-title"><span className="forecast-live-dot" /><h3>Weather along your route</h3><span className="forecast-route-name">{route?.name ?? '48-hour outlook'}</span><button className="forecast-minimize" type="button" aria-label={minimized ? 'Show weather forecast' : 'Minimize weather forecast'} aria-expanded={!minimized} aria-controls="forecast-content" onClick={() => { setPlaying(false); setMinimized(!minimized) }}>{minimized ? '+' : '−'}</button></div>
-      {!minimized && (forecast ? <div className="forecast-readings" aria-live="polite"><div><span>Max wind</span><strong>{forecast.wind?.toFixed(1) ?? '—'} <small>mph</small></strong></div><div><span>Max rain</span><strong>{forecast.rain?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Max snow</span><strong>{forecast.snow?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Highest risk</span><strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></div></div> : <p className="forecast-empty">Enter your stops to unlock arrival-time weather and a 48-hour forecast.</p>)}
+      {!minimized && (forecast ? <><div className="forecast-readings" aria-live="polite"><div><span>Max wind</span><strong>{forecast.wind?.toFixed(1) ?? '—'} <small>mph</small></strong></div><div><span>Max rain</span><strong>{formatPrecipitation(forecast.rain)} <small>in/hr</small></strong></div><div><span>Max snow</span><strong>{formatPrecipitation(forecast.snow)} <small>in/hr</small></strong></div><div><span>Highest risk</span><strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></div></div><p className="forecast-coverage">{forecast.known === forecast.total && forecast.rain === 0 && forecast.snow === 0 ? 'No rain or snow forecast at the selected hour.' : `Weather available for ${forecast.known} of ${forecast.total} checkpoints at the selected hour.`}</p></> : <p className="forecast-empty">Enter your stops to unlock arrival-time weather and a 48-hour forecast.</p>)}
     </div>
     <div id="forecast-content" hidden={minimized || !route}>{route && <div className="forecast-timeline">
       <div className="timeline-heading"><div><span className="timeline-label">FORECAST TIMELINE</span><span className="timeline-date">{selectedTime ? `${selectedTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${time(selectedTime.toISOString())}` : 'Forecast pending'}<b>+{hour}h</b></span></div><button className={`layer-toggle ${heatmap ? 'enabled' : ''}`} type="button" aria-pressed={heatmap} onClick={() => { setPlaying(false); setHeatmap(!heatmap) }}>Weather layer <i /></button></div>

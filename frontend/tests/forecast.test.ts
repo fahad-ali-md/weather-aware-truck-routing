@@ -1,11 +1,18 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { corridorAt, forecastAt, forecastWeight } from '../src/features/weather-map/forecast.ts'
+import { corridorAt, forecastAt, forecastWeight, formatPrecipitation } from '../src/features/weather-map/forecast.ts'
 import type { Checkpoint } from '../src/lib/api'
 
 function point(frames: Checkpoint['frames']): Checkpoint {
   return { id: 'a', lat: 40, lon: -80, mile: 0, represented_miles: 5, eta: '2026-11-18T10:00:00Z', frames }
 }
+
+test('small nonzero precipitation never displays as zero', () => {
+  assert.equal(formatPrecipitation(0), '0.000')
+  assert.equal(formatPrecipitation(0.0003), '<0.001')
+  assert.equal(formatPrecipitation(0.0123), '0.012')
+  assert.equal(formatPrecipitation(null), '—')
+})
 
 test('slider selects hourly readings rather than the arrival forecast', () => {
   const checkpoint = point([[8, 0, 0, 'Low'], [19, 0.01, 0, 'Low'], [40, 0.3, 0, 'High']])

@@ -2,6 +2,12 @@ import type { Checkpoint, Level } from '../../lib/api'
 
 const riskLevels: Level[] = ['Low', 'Moderate', 'High', 'Severe', 'No Travel']
 
+export function formatPrecipitation(value: number | null) {
+  if (value === null) return '—'
+  if (value > 0 && value < 0.0005) return '<0.001'
+  return value.toFixed(3)
+}
+
 export function forecastAt(point: Checkpoint, hour: number) {
   const frame = point.frames?.[hour]
   const number = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null

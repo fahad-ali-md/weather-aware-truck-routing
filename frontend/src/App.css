@@ -90,6 +90,7 @@
 .forecast-readings .forecast-risk { display: flex; align-items: center; gap: 6px; font-size: clamp(12px, 1.4vw, 17px); min-height: 27px; letter-spacing: -.2px; }
 .forecast-risk i { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .forecast-empty { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 9px; }
+.forecast-coverage { margin-top: 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .forecast-timeline { padding: 13px 20px 0; background: #172e3a; color: #fff; }
 .timeline-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .timeline-heading > div { display: grid; gap: 5px; }
