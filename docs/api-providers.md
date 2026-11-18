@@ -1,6 +1,6 @@
 # API provider decision
 
-Researched on 2026-11-18 for the free, noncommercial Weather-Aware Truck Routing demo. This records the selected providers; no account, key, or provider integration has been created or tested in this research step.
+Researched on 2026-11-18 for the free, noncommercial Weather-Aware Truck Routing demo. This records the provider-selection research. TomTom and Open-Meteo have since been integrated and tested with live requests.
 
 ## Selected stack
 
@@ -13,7 +13,7 @@ Researched on 2026-11-18 for the free, noncommercial Weather-Aware Truck Routing
 | Basemap tiles | OpenFreeMap public instance | No registration, key, or stated map-view/request quota. Required data attribution; no SLA. |
 | Risk scoring and route ranking | Our Django application | Pure application logic, independent of provider responses. |
 
-TomTom's monthly allowances above come from its current pricing page, not older community posts advertising daily limits. Allowances are account budgets, not a promise of that many complete trip analyses. Keep the account on free access without adding a payment method, and handle quota failures explicitly. Account-specific access and authenticated route responses still require verification with the project's own API key.
+TomTom's monthly allowances above come from its current pricing page, not older community posts advertising daily limits. Allowances are account budgets, not a promise of that many complete trip analyses. Keep the account on free access without adding a payment method, and handle quota failures explicitly. The project key has been used to verify authenticated truck-route responses.
 
 Sources: [TomTom pricing](https://docs.tomtom.com/pricing), [Open-Meteo pricing](https://open-meteo.com/en/pricing), [OpenFreeMap](https://openfreemap.org/).
 
@@ -49,4 +49,4 @@ Feedback is supporting evidence, not a performance benchmark or a representative
 
 ## First authenticated validation
 
-With the project's TomTom key, verify a realistic long-distance trip: truck mode, alternative count, geometry, cumulative timing, and address lookup. Check a corridor with multiple roads and one with fewer alternatives. Keep the key server-side. No paid subscription is required for the selected demo design.
+A Chicago-to-Detroit test with the project key returned three truck routes with geometry and cumulative timing. Fewer alternatives can be returned on other corridors. Keep the key server-side; no paid subscription is required for the selected demo design.

@@ -4,7 +4,6 @@ React + Django monorepo. Reuse existing folders and create modules only when the
 
 ```text
 weather/
-├── AGENTS.md
 ├── .gitignore
 ├── frontend/
 │   ├── package.json
@@ -21,7 +20,8 @@ weather/
 │       ├── manage.py
 │       ├── worker.py           # Cloudflare WSGI adapter
 │       ├── config/             # Local and Cloudflare Django settings/URLs
-│       └── trips/              # Generated Django application
+│       ├── integrations/       # Routing and forecast clients
+│       └── trips/              # Trip planning and risk policy
 │           └── migrations/
 └── docs/
     ├── architecture.md
@@ -36,6 +36,6 @@ Cloudflare serves the React build directly and dispatches `/api/*` to Django thr
 
 ## Implementation boundaries
 
-Keep API views thin. Put orchestration in services, database reads in selectors, and risk calculations in pure Python. Add routing, weather and integration modules when implementing those capabilities. Organize React features around trip planning, route comparison and the weather map as those screens are built.
+Keep API views thin. Put orchestration in services, database reads in selectors, and risk calculations in pure Python. Routing, weather, and integration modules are implemented. React is organized around trip planning, route comparison, and the weather map.
 
-The starter does not yet implement trip analysis, provider integrations, background jobs, or database models. PostgreSQL, Redis and Celery are conventional-server options; they are not services in this free Cloudflare deployment. Choose a supported background execution mechanism before adding asynchronous analyses.
+Trip analysis and provider integrations are implemented; the application does not currently use background jobs or persistent trip models. PostgreSQL, Redis and Celery are conventional-server options; they are not services in this free Cloudflare deployment. Choose a supported background execution mechanism before adding asynchronous analyses.

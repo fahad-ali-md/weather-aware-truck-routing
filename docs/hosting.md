@@ -20,7 +20,7 @@ The generated local Django settings and URLs remain in `backend/src/config/setti
 - Secrets: `DJANGO_SECRET_KEY` and `TOMTOM_API_KEY`, stored through Wrangler; never commit their values.
 - Frontend build and lint pass. Local Django system checks pass.
 - Live URL: https://weather-routing.fahad288ali.workers.dev
-- Deployed 2026-11-18; version `0850606a-4bef-4d71-aacd-31d094aa2b89`.
+- Deployed 2026-11-18. Use `wrangler deployments list` from `backend/` to inspect the current version.
 - Verified HTTP 200 for the React page, `/api/health/`, `/api/status/`, a Chicago-to-Detroit routing request returning three routes, and a two-checkpoint weather forecast request.
 - Django initializes in the Worker module rather than on each request. Initializing on the first request exceeded the free Worker CPU limit during testing. Monitor CPU and provider quotas as traffic and route complexity grow.
 - Application code lives in `backend/src/` so source discovery excludes virtual environments. No source is duplicated. The bundle is approximately 6.26 MiB compressed.
