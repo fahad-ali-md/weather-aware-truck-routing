@@ -19,6 +19,32 @@ function App() {
   const [error, setError] = useState('')
   const [focusId, setFocusId] = useState<string | null>(null)
   const [showRules, setShowRules] = useState(false)
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false)
+  const mobilePanel = useRef<HTMLElement>(null)
+  const mobileSearch = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!mobilePanelOpen || !window.matchMedia('(max-width: 767px)').matches) return
+    const previousOverflow = document.body.style.overflow
+    const searchButton = mobileSearch.current
+    document.body.style.overflow = 'hidden'
+    mobilePanel.current?.querySelector<HTMLButtonElement>('.mobile-panel-close')?.focus()
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMobilePanelOpen(false)
+      if (event.key !== 'Tab') return
+      const items = mobilePanel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]')
+      const visible = Array.from(items ?? []).filter(item => item.getClientRects().length > 0)
+      if (!visible.length) return
+      const first = visible[0], last = visible[visible.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = previousOverflow
+      searchButton?.focus()
+    }
+  }, [mobilePanelOpen])
   const rulesDialog = useRef<HTMLElement>(null)
   useEffect(() => {
     if (!showRules) return
@@ -58,7 +84,7 @@ function App() {
     active.current?.abort()
     const controller = new AbortController()
     active.current = controller
-    setSubmittedTrip(input); setEditingTrip(false)
+    setSubmittedTrip(input); setEditingTrip(false); setMobilePanelOpen(false)
     setBusy(true); setError(''); setPlan(null); setSelected(0); setHour(0); setFocusId(null)
     setProgress('Finding truck routes…')
     try {
@@ -71,6 +97,7 @@ function App() {
       if (!controller.signal.aborted) {
         setError(failure instanceof Error ? failure.message : 'Unable to analyze the trip. Please retry.')
         setEditingTrip(true)
+        setMobilePanelOpen(true)
       }
     } finally {
       if (active.current === controller) { setBusy(false); setProgress('') }
@@ -89,7 +116,9 @@ function App() {
     </header>
     <nav className="mobile-nav" aria-label="Workspace sections"><a href="#trip-planner">{editingTrip ? 'Plan trip' : 'Route options'}</a><a href="#route-map">Route map</a>{plan && <a href="#checkpoints">Checkpoints</a>}</nav>
     <div className="main-layout">
-      <aside className="sidebar" id="trip-planner" aria-label="Trip planner and route comparison">
+      <button className={`mobile-panel-backdrop ${mobilePanelOpen ? 'is-open' : ''}`} aria-label="Close trip panel" onClick={() => setMobilePanelOpen(false)} tabIndex={-1} />
+      <aside ref={mobilePanel} className={`sidebar ${mobilePanelOpen ? 'mobile-open' : ''}`} id="trip-planner" aria-label="Trip planner and route comparison">
+        <button className="mobile-panel-close" type="button" onClick={() => setMobilePanelOpen(false)} aria-label="Close trip panel">×</button>
         {!editingTrip && submittedTrip && <div className="directions-summary">
           <div className="directions-summary-top"><button className="directions-back" aria-label="Edit trip details" onClick={() => setEditingTrip(true)} disabled={busy}>←</button><h1>Your truck routes</h1><span className="directions-mode" title="Truck routing"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h11v11H3V6Zm11 4h4l3 4v3h-7v-7Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><circle cx="7" cy="18" r="2" fill="white" stroke="currentColor" strokeWidth="1.7" /><circle cx="18" cy="18" r="2" fill="white" stroke="currentColor" strokeWidth="1.7" /></svg></span></div>
           <div className="directions-stops"><div><i className="stop-origin" /><span>{submittedTrip.origin}</span></div><div><i className="stop-destination" /><span>{submittedTrip.destination}</span></div></div>
@@ -101,12 +130,13 @@ function App() {
         </div>
         {error && <div className="sidebar-message notice danger" role="alert">{error}</div>}
         {busy && <div className="directions-progress" role="status"><span className="spinner" /><div><strong>Checking your route options</strong><p>{progress}</p></div><button onClick={() => { active.current?.abort(); setPlan(null); setBusy(false); setProgress(''); setEditingTrip(true) }}>Cancel</button></div>}
-        {plan && !editingTrip && <RouteResults plan={plan} selected={selected} onSelect={setSelected} busy={busy} />}
+        {plan && !editingTrip && <RouteResults plan={plan} selected={selected} onSelect={index => { setSelected(index); setMobilePanelOpen(false) }} busy={busy} />}
       </aside>
       <main className="workspace">
         <section className="map-section" id="route-map" aria-labelledby="map-title">
           <div className="map-stage"><WeatherMap plan={plan} selected={selected} onSelect={setSelected} focusId={focusId} hour={hour} heatmap={heatmap} /></div>
           <div className="map-heading"><div><span className="eyebrow">{plan ? 'YOUR JOURNEY' : 'ROUTE EXPLORER'}</span><h2 id="map-title">{plan ? `${plan.origin.label.split(',')[0]} → ${plan.destination.label.split(',')[0]}` : 'Your next route, in focus.'}</h2><p>{plan ? `${plan.routes.length} truck routes · ${plan.spacing}-mile weather checkpoints` : 'Plan a trip to see the weather along your way.'}</p></div>{plan && <span className="map-selection">{plan.routes[selected].name}</span>}</div>
+          <button ref={mobileSearch} type="button" className="mobile-map-search" aria-label={plan ? 'Open trip details and route options' : 'Open trip planner'} aria-expanded={mobilePanelOpen} aria-controls="trip-planner" onClick={() => setMobilePanelOpen(true)}><span className="mobile-search-icon" aria-hidden="true">⌕</span><span className="mobile-search-copy"><strong>{submittedTrip ? `${submittedTrip.origin} → ${submittedTrip.destination}` : 'Where are you headed?'}</strong><small>{busy ? progress : plan ? `${plan.routes.length} routes · ${plan.routes[selected].name} selected` : 'Enter your trip details'}</small></span><span className="mobile-search-action">{plan ? 'Routes' : 'Plan'}</span></button>
           <div className="map-dock"><ForecastSlider key={`${plan?.departure}:${plan?.routes[selected]?.id}`} departure={plan?.departure} route={plan?.routes[selected]} hour={hour} setHour={setHour} heatmap={heatmap} setHeatmap={setHeatmap} /></div>
         </section>
         {plan?.warnings.map(warning => <div className="workspace-notice notice" key={warning}>{warning}</div>)}
