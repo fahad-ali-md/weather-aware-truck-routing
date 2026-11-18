@@ -1,9 +1,11 @@
+import asyncio
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import httpx
 import pytest
 
-from integrations.http import ProviderError, get_json
+from integrations.http import ProviderError, _worker_get_many, get_json
 
 
 def call_with(handler):
@@ -66,3 +68,32 @@ def test_invalid_json_has_a_separate_error_and_is_not_retried():
     with call_with(handler), pytest.raises(ProviderError, match="invalid response"):
         get_json("https://api.open-meteo.com/forecast", {})
     assert len(calls) == 1
+
+
+def test_worker_starts_independent_requests_concurrently():
+    async def exercise():
+        both_started = asyncio.Event()
+        calls = []
+
+        async def fetch(url):
+            calls.append(url)
+            if len(calls) == 2:
+                both_started.set()
+            await asyncio.wait_for(both_started.wait(), timeout=1)
+
+            async def body():
+                return '{"ok": true}'
+
+            return SimpleNamespace(ok=True, text=body)
+
+        with patch.dict("sys.modules", {"workers": SimpleNamespace(fetch=fetch)}):
+            results = await _worker_get_many(
+                [
+                    ("https://api.tomtom.com/one", {"key": "test"}),
+                    ("https://api.tomtom.com/two", {"key": "test"}),
+                ]
+            )
+        assert results == [{"ok": True}, {"ok": True}]
+        assert len(calls) == 2
+
+    asyncio.run(exercise())

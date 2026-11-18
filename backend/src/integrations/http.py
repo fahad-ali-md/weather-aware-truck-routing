@@ -1,5 +1,6 @@
 """Bounded JSON transport for CPython and Cloudflare's Pyodide runtime."""
 
+import asyncio
 import json
 import logging
 import sys
@@ -85,3 +86,47 @@ def get_json(base, params):
             logger.warning("%s", error)
             if attempt == 1 or not error.retryable:
                 raise
+
+
+async def _worker_get_many(requests):
+    """Run independent Worker fetches together, with the same bounded retry policy."""
+    from workers import fetch
+
+    async def request(base, params):
+        provider = "TomTom" if urlsplit(base).hostname == "api.tomtom.com" else "External provider"
+        url = base + "?" + urlencode(params, doseq=True)
+        for attempt in range(2):
+            try:
+                response = await fetch(url)
+                if not response.ok:
+                    raise _rejected(provider, response.status)
+                body = await response.text()
+                if len(body) > 6_000_000:
+                    raise ProviderError("Provider response is too large. Try a shorter trip.")
+                try:
+                    return json.loads(body)
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    raise ProviderError(
+                        f"{provider} returned an invalid response. Please retry."
+                    ) from None
+            except ProviderError as error:
+                if attempt == 1 or not error.retryable:
+                    raise
+            except Exception:
+                if attempt == 1:
+                    raise ProviderError(
+                        f"{provider} could not be reached or timed out. Please retry."
+                    ) from None
+
+    return await asyncio.gather(*(request(base, params) for base, params in requests))
+
+
+def get_json_many(requests):
+    if sys.platform == "emscripten":
+        from pyodide.ffi import run_sync
+
+        return run_sync(_worker_get_many(requests))
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=len(requests)) as executor:
+        return list(executor.map(lambda item: get_json(*item), requests))

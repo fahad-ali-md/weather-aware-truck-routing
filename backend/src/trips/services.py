@@ -28,7 +28,7 @@ def trip_input(data):
 
 def plan(data):
     origin, destination, departure, load, spacing = trip_input(data)
-    start, end = tomtom.geocode(origin), tomtom.geocode(destination)
+    start, end = tomtom.geocode_pair(origin, destination)
     raw_routes = tomtom.calculate_routes(start, end, departure)
     routes, seen = [], set()
     for raw in raw_routes:

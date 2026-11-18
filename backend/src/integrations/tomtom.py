@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .http import ProviderError, get_json
+from .http import ProviderError, get_json, get_json_many
 
 
 def api_key():
@@ -10,13 +10,17 @@ def api_key():
     return key
 
 
-def geocode(query):
+def geocode_request(query, key):
     from urllib.parse import quote
 
-    result = get_json(
+    return (
         f"https://api.tomtom.com/search/2/geocode/{quote(query, safe='')}.json",
-        {"key": api_key(), "limit": 1},
-    ).get("results", [])
+        {"key": key, "limit": 1},
+    )
+
+
+def parse_geocode(query, response):
+    result = response.get("results", [])
     if not result:
         raise ProviderError(
             f"No address found for {query}. Try a city and state or full address.", 422
@@ -27,6 +31,16 @@ def geocode(query):
         "lat": item["position"]["lat"],
         "lon": item["position"]["lon"],
     }
+
+
+def geocode(query):
+    return parse_geocode(query, get_json(*geocode_request(query, api_key())))
+
+
+def geocode_pair(origin, destination):
+    key = api_key()
+    responses = get_json_many([geocode_request(origin, key), geocode_request(destination, key)])
+    return parse_geocode(origin, responses[0]), parse_geocode(destination, responses[1])
 
 
 def calculate_routes(origin, destination, departure):

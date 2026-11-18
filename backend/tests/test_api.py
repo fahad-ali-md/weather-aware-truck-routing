@@ -60,7 +60,9 @@ def test_forecast_batch_bound_and_nan_coordinates():
 
 
 def test_provider_failure_is_controlled():
-    with patch("trips.services.tomtom.geocode", side_effect=ProviderError("Weather unavailable")):
+    with patch(
+        "trips.services.tomtom.geocode_pair", side_effect=ProviderError("Weather unavailable")
+    ):
         response = post("routes", trip())
     assert response.status_code == 502
 
