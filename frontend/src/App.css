@@ -37,7 +37,9 @@
 .field { display: block; margin-top: 18px; color: var(--ink); font-size: 13px; font-weight: 500; min-width: 0; }
 .field-hint { float: right; color: var(--muted); font-size: 12px; font-weight: 400; }
 .field > input, .input-unit { display: flex; width: 100%; min-height: 46px; margin-top: 8px; padding: 11px 12px; border: 1px solid #b9c9d3; border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 14px; }
-.field:focus-within > input, .input-unit:focus-within, .locations:focus-within { border-color: var(--teal); }
+.field:focus-within > input, .input-unit:focus-within { border-color: var(--teal); }
+.locations:focus-within { border-color: #8d9da6; box-shadow: 0 0 0 2px #8d9da633; }
+.location-field input:focus-visible { outline: none; }
 .input-unit { align-items: center; gap: 12px; }
 .input-unit input { width: 100%; border: 0; background: transparent; color: var(--ink); padding: 0; }
 .input-unit > span { color: var(--muted); border-left: 1px solid var(--line); padding-left: 12px; font-size: 13px; }
