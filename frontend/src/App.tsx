@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { TripForm } from './features/trip-planner/TripForm'
 import { CheckpointTable, RouteResults } from './features/route-results/RouteResults'
 import { ForecastSlider, WeatherMap } from './features/weather-map/WeatherMap'
-import { analyze, api, colors, levels } from './lib/api'
+import { analyze, api } from './lib/api'
 import type { Plan, TripInput } from './lib/api'
 import './App.css'
 
@@ -105,10 +105,9 @@ function App() {
       </aside>
       <main className="workspace">
         <section className="map-section" id="route-map" aria-labelledby="map-title">
-          <div className="map-heading"><div><span className="eyebrow">Route overview</span><h2 id="map-title">{plan ? `${plan.origin.label.split(',')[0]} → ${plan.destination.label.split(',')[0]}` : 'See the road ahead.'}</h2><p>{plan ? `${plan.routes.length} truck routes · Checkpoints every ${plan.spacing} miles · ${plan.load_lb.toLocaleString()} lb cargo` : 'Compare truck routes with weather matched to your arrival.'}</p></div>{plan && <span className="map-selection">Viewing route {String.fromCharCode(65 + selected)}</span>}</div>
           <div className="map-stage"><WeatherMap plan={plan} selected={selected} onSelect={setSelected} focusId={focusId} hour={hour} heatmap={heatmap} /></div>
-          <div className="map-key"><span className="map-key-title">{heatmap && plan ? `Forecast risk · +${hour}h` : 'Arrival-time risk'}</span><div className="map-legend" aria-label="Weather risk legend">{levels.map(level => <span key={level}><i style={{ background: colors[level] }} />{level}</span>)}</div></div>
-          <ForecastSlider key={`${plan?.departure}:${plan?.routes[selected]?.id}`} departure={plan?.departure} route={plan?.routes[selected]} hour={hour} setHour={setHour} heatmap={heatmap} setHeatmap={setHeatmap} />
+          <div className="map-heading"><div><span className="eyebrow">{plan ? 'YOUR JOURNEY' : 'ROUTE EXPLORER'}</span><h2 id="map-title">{plan ? `${plan.origin.label.split(',')[0]} → ${plan.destination.label.split(',')[0]}` : 'Your next route, in focus.'}</h2><p>{plan ? `${plan.routes.length} truck routes · ${plan.spacing}-mile weather checkpoints` : 'Plan a trip to see the weather along your way.'}</p></div>{plan && <span className="map-selection">{plan.routes[selected].name}</span>}</div>
+          <div className="map-dock"><ForecastSlider key={`${plan?.departure}:${plan?.routes[selected]?.id}`} departure={plan?.departure} route={plan?.routes[selected]} hour={hour} setHour={setHour} heatmap={heatmap} setHeatmap={setHeatmap} /></div>
         </section>
         {plan?.warnings.map(warning => <div className="workspace-notice notice" key={warning}>{warning}</div>)}
         {plan && <CheckpointTable route={plan.routes[selected]} onFocus={id => { setFocusId(null); requestAnimationFrame(() => setFocusId(id)); document.querySelector('.map-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} />}

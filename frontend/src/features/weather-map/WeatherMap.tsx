@@ -3,7 +3,7 @@ import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource } from 'maplibre-gl'
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { colors, routeColors, time } from '../../lib/api'
+import { colors, levels, routeColors, time } from '../../lib/api'
 import type { Plan, Route } from '../../lib/api'
 import { corridorAt, forecastAt, forecastWeight } from './forecast'
 import { WindLayer } from './WindLayer'
@@ -17,6 +17,7 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
   const popup = useRef<maplibregl.Popup | null>(null)
+  const [viewReset, setViewReset] = useState(0)
   const [ready, setReady] = useState(false)
   const [mapError, setMapError] = useState(false)
   const latest = useRef({ plan, onSelect })
@@ -30,6 +31,7 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
     })
     map.current = instance
     instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    instance.addControl(new maplibregl.FullscreenControl({ container: container.current.closest<HTMLElement>('.map-section') ?? container.current }), 'top-right')
     const resize = new ResizeObserver(() => instance.resize())
     resize.observe(container.current)
     instance.on('error', event => { if (event.error.message.includes('style')) setMapError(true) })
@@ -105,10 +107,12 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
     if (!map.current || !ready || !plan) return
     const bounds = new maplibregl.LngLatBounds()
     plan.routes.forEach(route => route.geometry.forEach(point => bounds.extend([point[0], point[1]])))
-    map.current.fitBounds(bounds, { padding: Math.min(56, map.current.getContainer().clientWidth * 0.1), duration: 800, maxZoom: 11 })
+    const height = map.current.getContainer().clientHeight
+    const dock = container.current?.closest('.map-section')?.querySelector('.map-dock')?.getBoundingClientRect().height ?? 220
+    map.current.fitBounds(bounds, { padding: { top: 120, bottom: Math.min(dock + 48, height * 0.48), left: 32, right: 64 }, duration: 800, maxZoom: 11 })
     // Fit on a new trip, not on each weather progress update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tripKey, ready])
+  }, [tripKey, ready, viewReset])
 
   useEffect(() => {
     if (!focusId || !map.current) return
@@ -116,11 +120,12 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
     if (point) map.current.flyTo({ center: [point.lon, point.lat], zoom: 9, duration: 800 })
   }, [focusId, plan])
 
-  return <><div className="map-canvas" ref={container} aria-label="Map showing truck routes, weather checkpoints and forecast corridor" /><WindLayer mapRef={map} ready={ready} route={plan?.routes[selected]} hour={hour} weatherVisible={heatmap} />{mapError && <div className="map-error notice">Basemap unavailable. Route summaries and checkpoint forecasts remain available below.</div>}{!ready && <div className="map-loading"><span className="spinner" /> Loading map…</div>}</>
+  return <><div className="map-canvas" ref={container} aria-label="Map showing truck routes, weather checkpoints and forecast corridor" /><button className="fit-route-button" type="button" disabled={!ready || !plan} onClick={() => setViewReset(value => value + 1)} aria-label="Fit all routes on the map" title="Fit routes"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" /></svg></button><WindLayer mapRef={map} ready={ready} route={plan?.routes[selected]} hour={hour} weatherVisible={heatmap} />{mapError && <div className="map-error notice">Basemap unavailable. Route summaries and checkpoint forecasts remain available below.</div>}{!ready && <div className="map-loading"><span className="spinner" /> Loading map…</div>}</>
 }
 
 export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHeatmap }: { departure?: string; route?: Route; hour: number; setHour: (hour: number) => void; heatmap: boolean; setHeatmap: (value: boolean) => void }) {
   const [playing, setPlaying] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const selectedTime = departure ? new Date(new Date(departure).getTime() + hour * 3600000) : null
   const forecast = route ? corridorAt(route.checkpoints, hour) : null
   const available = !!departure && !!forecast?.known
@@ -138,16 +143,22 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
     setHeatmap(true)
   }
   return <section className={`forecast-panel ${route ? 'has-route' : 'is-empty'}`} aria-label="48 hour corridor weather forecast">
-    <div className="forecast-header"><div><span className="forecast-icon" aria-hidden="true">◷</span><div><h3>48-hour weather outlook</h3><p>{route ? 'Explore conditions along the selected route.' : 'Plan a trip to explore its hourly forecast.'}</p></div></div><button className={`layer-toggle ${heatmap ? 'enabled' : ''}`} type="button" aria-pressed={heatmap} onClick={() => { setPlaying(false); setHeatmap(!heatmap) }}><span>◉</span> Weather layer <i /></button></div>
-    <div className="forecast-playback"><button className="forecast-play" type="button" disabled={!available} aria-label={playing ? 'Pause forecast animation' : 'Play 48-hour forecast'} onClick={() => { if (!playing && hour === 48) setHour(0); setHeatmap(true); setPlaying(!playing) }}>{playing ? 'Ⅱ Pause' : '▶ Play forecast'}</button><span>{route ? `${route.name} · ${hour} hours after departure` : 'Plan a trip to start'}</span></div>
-    <div className="forecast-time"><span>{selectedTime ? `${selectedTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${time(selectedTime.toISOString())}` : 'Plan a trip to explore its forecast'}</span><strong>+{hour}h</strong></div>
-    {forecast && <div className="forecast-readings" aria-live="polite"><span>Max wind <strong>{forecast.wind?.toFixed(1) ?? '—'} mph</strong></span><span>Max rain <strong>{forecast.rain?.toFixed(3) ?? '—'} in/hr</strong></span><span>Max snow <strong>{forecast.snow?.toFixed(3) ?? '—'} in/hr</strong></span><span>Highest risk <strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></span></div>}
-    {route && <><div className="forecast-chart-label">Wind outlook · tallest bar = strongest wind</div><div className="forecast-wind-chart" aria-label="Hourly maximum wind along the selected route">{Array.from({ length: 49 }, (_, index) => {
-      const reading = corridorAt(route.checkpoints, index)
-      return <button key={index} type="button" disabled={!reading.known} aria-label={`Hour ${index}: maximum wind ${reading.wind?.toFixed(1) ?? 'unavailable'} mph`} aria-pressed={index === hour} title={`+${index}h · ${reading.wind?.toFixed(1) ?? '—'} mph`} onClick={() => seek(index)}><i style={{ height: `${Math.max(8, Math.min(100, (reading.wind ?? 0) / 55 * 100))}%`, background: index === hour ? '#162b3a' : colors[reading.worst] }} /></button>
-    })}</div></>}
-    <input aria-label="Forecast hours after departure" type="range" min="0" max="48" step="1" value={hour} disabled={!departure} onChange={event => seek(Number(event.target.value))} />
-    <div className="slider-ticks"><span>Departure</span><span>+12h</span><span>+24h</span><span>+36h</span><span>+48h</span></div>
-    <details className="forecast-explainer"><summary>How this forecast relates to your route</summary><p>{forecast ? `${route?.name} · ${forecast.known}/${forecast.total} forecasts available. ${forecast.worst === 'Low' && forecast.known === forecast.total ? 'Conditions remain Low risk at this hour; readings can still change.' : 'Readings show maxima along this route at the selected hour.'} ` : ''}{heatmap ? 'Map dots and weather layer show the selected hour.' : 'Weather layer off; map dots show arrival-time weather.'} Route scores and the table keep arrival-time forecasts.</p></details>
+    <div className="forecast-summary">
+      <div className="forecast-summary-title"><span className="forecast-live-dot" /><h3>Weather along your route</h3><span className="forecast-route-name">{route?.name ?? '48-hour outlook'}</span></div>
+      {forecast ? <div className="forecast-readings" aria-live="polite"><div><span>Max wind</span><strong>{forecast.wind?.toFixed(1) ?? '—'} <small>mph</small></strong></div><div><span>Max rain</span><strong>{forecast.rain?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Max snow</span><strong>{forecast.snow?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Highest risk</span><strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></div></div> : <p className="forecast-empty">Enter your stops to unlock arrival-time weather and a 48-hour forecast.</p>}
+    </div>
+    {route && <div className="forecast-timeline">
+      <div className="timeline-heading"><div><span className="timeline-label">FORECAST TIMELINE</span><span className="timeline-date">{selectedTime ? `${selectedTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${time(selectedTime.toISOString())}` : 'Forecast pending'}<b>+{hour}h</b></span></div><button className={`layer-toggle ${heatmap ? 'enabled' : ''}`} type="button" aria-pressed={heatmap} onClick={() => { setPlaying(false); setHeatmap(!heatmap) }}>Weather layer <i /></button></div>
+      <div className="timeline-track"><button className="forecast-play" type="button" disabled={!available} aria-label={playing ? 'Pause forecast animation' : 'Play 48-hour forecast'} onClick={() => { if (!playing && hour === 48) setHour(0); setHeatmap(true); setPlaying(!playing) }}>{playing ? 'Ⅱ' : '▶'}</button><div className="timeline-scrubber">
+        <div className="forecast-wind-chart" aria-label="Hourly maximum wind along the selected route">{Array.from({ length: 49 }, (_, index) => {
+          const reading = corridorAt(route.checkpoints, index)
+          return <button key={index} type="button" tabIndex={-1} disabled={!reading.known} aria-label={`Hour ${index}: maximum wind ${reading.wind?.toFixed(1) ?? 'unavailable'} mph`} aria-pressed={index === hour} title={`+${index}h · ${reading.wind?.toFixed(1) ?? '—'} mph`} onClick={() => seek(index)}><i style={{ height: `${Math.max(10, Math.min(100, (reading.wind ?? 0) / 55 * 100))}%`, background: index === hour ? '#b8f2df' : colors[reading.worst] }} /></button>
+        })}</div>
+        <input aria-label="Forecast hours after departure" type="range" min="0" max="48" step="1" value={hour} disabled={!departure} onChange={event => seek(Number(event.target.value))} />
+        <div className="slider-ticks"><span>Departure</span><span>+12h</span><span>+24h</span><span>+36h</span><span>+48h</span></div>
+      </div></div>
+      <div className="timeline-footer"><span>{heatmap ? `Map weather · departure +${hour}h` : 'Map weather · arrival time'}</span><button type="button" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide details ↑' : 'Forecast details ↓'}</button></div>
+      {expanded && <div className="forecast-details"><div className="map-legend" aria-label="Weather risk legend">{levels.map(level => <span key={level}><i style={{ background: colors[level] }} />{level}</span>)}</div><p>{forecast?.known}/{forecast?.total} checkpoints have weather at this hour. Bars show maximum wind. {heatmap ? 'Map dots and wind animation follow the selected hour.' : 'Map dots show weather at checkpoint arrival.'} Route rankings and the table always use arrival-time forecasts.</p></div>}
+    </div>}
   </section>
 }
