@@ -36,6 +36,11 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
     resize.observe(container.current)
     instance.on('error', event => { if (event.error.message.includes('style')) setMapError(true) })
     instance.on('load', () => {
+      // MapLibre opens its compact credits on first load; keep the info control
+      // closed initially while leaving the required attribution one click away.
+      const attribution = container.current?.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')
+      attribution?.classList.remove('maplibregl-compact-show')
+      attribution?.removeAttribute('open')
       instance.addSource('routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       instance.addSource('checkpoints', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       instance.addLayer({ id: 'corridor-heat', type: 'heatmap', source: 'checkpoints', paint: {
