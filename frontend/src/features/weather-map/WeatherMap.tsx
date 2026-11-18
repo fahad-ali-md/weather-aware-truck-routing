@@ -126,6 +126,7 @@ export function WeatherMap({ plan, selected, onSelect, focusId, hour, heatmap }:
 export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHeatmap }: { departure?: string; route?: Route; hour: number; setHour: (hour: number) => void; heatmap: boolean; setHeatmap: (value: boolean) => void }) {
   const [playing, setPlaying] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  const [minimized, setMinimized] = useState(false)
   const selectedTime = departure ? new Date(new Date(departure).getTime() + hour * 3600000) : null
   const forecast = route ? corridorAt(route.checkpoints, hour) : null
   const available = !!departure && !!forecast?.known
@@ -142,12 +143,12 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
     setHour(next)
     setHeatmap(true)
   }
-  return <section className={`forecast-panel ${route ? 'has-route' : 'is-empty'}`} aria-label="48 hour corridor weather forecast">
+  return <section className={`forecast-panel ${route ? 'has-route' : 'is-empty'} ${minimized ? 'is-minimized' : ''}`} aria-label="48 hour corridor weather forecast">
     <div className="forecast-summary">
-      <div className="forecast-summary-title"><span className="forecast-live-dot" /><h3>Weather along your route</h3><span className="forecast-route-name">{route?.name ?? '48-hour outlook'}</span></div>
-      {forecast ? <div className="forecast-readings" aria-live="polite"><div><span>Max wind</span><strong>{forecast.wind?.toFixed(1) ?? '—'} <small>mph</small></strong></div><div><span>Max rain</span><strong>{forecast.rain?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Max snow</span><strong>{forecast.snow?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Highest risk</span><strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></div></div> : <p className="forecast-empty">Enter your stops to unlock arrival-time weather and a 48-hour forecast.</p>}
+      <div className="forecast-summary-title"><span className="forecast-live-dot" /><h3>Weather along your route</h3><span className="forecast-route-name">{route?.name ?? '48-hour outlook'}</span><button className="forecast-minimize" type="button" aria-label={minimized ? 'Show weather forecast' : 'Minimize weather forecast'} aria-expanded={!minimized} aria-controls="forecast-content" onClick={() => { setPlaying(false); setMinimized(!minimized) }}>{minimized ? '+' : '−'}</button></div>
+      {!minimized && (forecast ? <div className="forecast-readings" aria-live="polite"><div><span>Max wind</span><strong>{forecast.wind?.toFixed(1) ?? '—'} <small>mph</small></strong></div><div><span>Max rain</span><strong>{forecast.rain?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Max snow</span><strong>{forecast.snow?.toFixed(3) ?? '—'} <small>in/hr</small></strong></div><div><span>Highest risk</span><strong className="forecast-risk"><i style={{ background: colors[forecast.worst] }} />{forecast.worst}</strong></div></div> : <p className="forecast-empty">Enter your stops to unlock arrival-time weather and a 48-hour forecast.</p>)}
     </div>
-    {route && <div className="forecast-timeline">
+    <div id="forecast-content" hidden={minimized || !route}>{route && <div className="forecast-timeline">
       <div className="timeline-heading"><div><span className="timeline-label">FORECAST TIMELINE</span><span className="timeline-date">{selectedTime ? `${selectedTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${time(selectedTime.toISOString())}` : 'Forecast pending'}<b>+{hour}h</b></span></div><button className={`layer-toggle ${heatmap ? 'enabled' : ''}`} type="button" aria-pressed={heatmap} onClick={() => { setPlaying(false); setHeatmap(!heatmap) }}>Weather layer <i /></button></div>
       <div className="timeline-track"><button className="forecast-play" type="button" disabled={!available} aria-label={playing ? 'Pause forecast animation' : 'Play 48-hour forecast'} onClick={() => { if (!playing && hour === 48) setHour(0); setHeatmap(true); setPlaying(!playing) }}>{playing ? 'Ⅱ' : '▶'}</button><div className="timeline-scrubber">
         <div className="forecast-wind-chart" aria-label="Hourly maximum wind along the selected route">{Array.from({ length: 49 }, (_, index) => {
@@ -159,6 +160,6 @@ export function ForecastSlider({ departure, route, hour, setHour, heatmap, setHe
       </div></div>
       <div className="timeline-footer"><span>{heatmap ? `Map weather · departure +${hour}h` : 'Map weather · arrival time'}</span><button type="button" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide details ↑' : 'Forecast details ↓'}</button></div>
       {expanded && <div className="forecast-details"><div className="map-legend" aria-label="Weather risk legend">{levels.map(level => <span key={level}><i style={{ background: colors[level] }} />{level}</span>)}</div><p>{forecast?.known}/{forecast?.total} checkpoints have weather at this hour. Bars show maximum wind. {heatmap ? 'Map dots and wind animation follow the selected hour.' : 'Map dots show weather at checkpoint arrival.'} Route rankings and the table always use arrival-time forecasts.</p></div>}
-    </div>}
+    </div>}</div>
   </section>
 }
